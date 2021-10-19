@@ -4,6 +4,7 @@
 import argparse
 import logging
 import sys
+import requests
 
 from sec_filings_api import __version__
 
@@ -21,8 +22,23 @@ _logger = logging.getLogger(__name__)
 # when using this Python module as a library.
 
 
-def call_api():
-    return "blah"
+def get():
+    try:
+        headers = {
+            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36'
+        }
+        session = requests.Session()
+        response = session.get('https://data.sec.gov/submissions/CIK0001649339.json', timeout=5, headers=headers)
+        response.raise_for_status()
+        return response
+    except requests.exceptions.HTTPError as errHttp:
+        print(errHttp)
+    except requests.exceptions.ConnectionError as errConn:
+        print(errConn)
+    except requests.exceptions.Timeout as errTimeout:
+        print(errTimeout)
+    except requests.exceptions.RequestException as errRequest:
+        print(errRequest)
 
 
 # ---- CLI ----
@@ -87,7 +103,7 @@ def main(args):
     args = parse_args(args)
     setup_logging(args.loglevel)
     _logger.debug("Calling API...")
-    print("The API result is {}".format(call_api()))
+    print("The API result is {}".format(get()))
     _logger.info("Script ends here")
 
 
